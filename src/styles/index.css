@@ -3,7 +3,9 @@
 @theme {
   --color-night: #0b0d0c;
   --color-bone: #e8e4da;
-  --color-moss: #5b6b52;
+  --color-moss: #8a9a7e;
+  --color-sight: #7fa3b8;
+  --color-sight-text: #d6e6ef;
   --font-serif: 'Georgia', 'Times New Roman', serif;
 }
 
@@ -16,4 +18,15 @@ body,
 body {
   background-color: var(--color-night);
   color: var(--color-bone);
+}
+
+/* Mata batin: distorsi halus, bukan filter berlebihan (konsep §12). */
+.sight-active {
+  filter: saturate(0.6) contrast(1.08) hue-rotate(-12deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0ms !important;
+  }
 }

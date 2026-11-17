@@ -174,11 +174,23 @@ describe('hub harian', () => {
     expect(chooseVisit(day1, base(), 'balai_pagi')).toBeNull()
   })
 
-  it('kunjungan memajukan slot dan tidak bisa diulang', () => {
+  it('scene kunjungan berlangsung di slotnya; waktu maju saat kembali ke hub', () => {
     const step = chooseVisit(day1, base(), 'warung_pagi')!
     expect(step).toMatchObject({ kind: 'scene', sceneId: 'warung_01' })
-    expect(step.state.time.slot).toBe('siang')
-    expect(visitOptions(day1, step.state).map((o) => o.visit.id)).toEqual(['sastro_siang'])
+    expect(step.state.time.slot).toBe('pagi')
+
+    const back = returnToHub(day1, step.state)
+    expect(back.kind).toBe('hub')
+    expect(back.state.time.slot).toBe('siang')
+    expect(back.state.activeVisit).toBeNull()
+    expect(visitOptions(day1, back.state).map((o) => o.visit.id)).toEqual(['sastro_siang'])
+  })
+
+  it('kembali ke hub dari scene non-kunjungan tidak memajukan waktu', () => {
+    expect(returnToHub(day1, base())).toMatchObject({
+      kind: 'hub',
+      state: { time: { slot: 'pagi' } },
+    })
   })
 
   it('kunjungan di slot terakhir mengakhiri hari setelah scene selesai', () => {

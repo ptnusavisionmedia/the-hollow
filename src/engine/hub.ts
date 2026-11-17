@@ -31,7 +31,10 @@ function advanceSlot(day: DayDefinition, state: StoryState): StoryState {
     : { ...state, flags: addUnique(state.flags, dayOverFlag(day.day)) }
 }
 
-/** Pilih kunjungan: tandai selesai, majukan waktu, lalu masuk ke scene lokasi. */
+/**
+ * Pilih kunjungan: tandai selesai, lalu masuk ke scene lokasi.
+ * Waktu baru maju saat pemain kembali ke hub, supaya scene berlangsung di slot kunjungannya.
+ */
 export function chooseVisit(
   day: DayDefinition,
   state: StoryState,
@@ -40,13 +43,22 @@ export function chooseVisit(
   const option = visitOptions(day, state).find((o) => o.visit.id === visitId)
   if (!option || option.locked) return null
 
-  const visited = { ...state, visitsDone: addUnique(state.visitsDone, visitId) }
-  return { kind: 'scene', sceneId: option.visit.sceneId, state: advanceSlot(day, visited) }
+  return {
+    kind: 'scene',
+    sceneId: option.visit.sceneId,
+    state: { ...state, visitsDone: addUnique(state.visitsDone, visitId), activeVisit: visitId },
+  }
 }
 
-/** Dipanggil saat scene lokasi selesai. */
+/**
+ * Dipanggil saat scene keluar ke hub. Kalau scene itu bagian dari kunjungan, waktu maju satu slot;
+ * kalau slot sudah habis, hari berakhir.
+ */
 export function returnToHub(day: DayDefinition, state: StoryState): HubStep {
-  return state.flags.includes(dayOverFlag(day.day)) ? endDay(day, state) : { kind: 'hub', state }
+  const settled = state.activeVisit ? advanceSlot(day, { ...state, activeVisit: null }) : state
+  return settled.flags.includes(dayOverFlag(day.day))
+    ? endDay(day, settled)
+    : { kind: 'hub', state: settled }
 }
 
 /** Lewati slot saat ini tanpa mengunjungi lokasi (misalnya Farez beristirahat). */
@@ -59,7 +71,7 @@ export function endDay(day: DayDefinition, state: StoryState): HubStep {
   return {
     kind: 'dayOver',
     sceneId: day.closingSceneId,
-    state: { ...state, flags: addUnique(state.flags, dayOverFlag(day.day)) },
+    state: { ...state, activeVisit: null, flags: addUnique(state.flags, dayOverFlag(day.day)) },
   }
 }
 

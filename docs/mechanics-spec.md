@@ -50,7 +50,7 @@ Setiap hari dibagi menjadi slot waktu. Di hub, pemain memilih lokasi; setiap kun
 1. Hari didefinisikan di konten: slot mana yang aktif, dan kunjungan mana yang tersedia per slot.
 2. Sebuah kunjungan (lokasi × slot) bisa punya syarat (`requires`), misalnya butuh flag atau trust tertentu.
 3. Setiap kunjungan hanya bisa dilakukan sekali.
-4. Mengunjungi lokasi memindahkan waktu ke slot berikutnya.
+4. Scene kunjungan berlangsung di slot kunjungannya. Waktu baru maju ke slot berikutnya saat pemain kembali ke hub.
 5. Kalau slot habis, atau pemain memilih "akhiri hari", engine masuk ke scene penutup hari tersebut.
 6. Scene penting cerita (misalnya hook Prolog) tetap bisa dipaksa lewat scene biasa, di luar hub.
 

@@ -20,6 +20,7 @@ export function createInitialState(startSceneId: string): StoryState {
     promisesBroken: [],
     time: { day: 1, slot: 'pagi' },
     visitsDone: [],
+    activeVisit: null,
     innerSightUsed: [],
     deductionsSolved: [],
     deductionsFailed: [],

@@ -113,16 +113,27 @@ export type ChoiceOption = {
   showWhenLocked?: boolean
 }
 
-export type Beat =
-  | Line
-  | { kind: 'choice'; options: readonly ChoiceOption[] }
-  | { kind: 'effects'; effects: readonly Effect[] }
+export type ChoiceBeat = { kind: 'choice'; options: readonly ChoiceOption[] }
 
+export type Beat = Line | ChoiceBeat | { kind: 'effects'; effects: readonly Effect[] }
+
+/**
+ * Ke mana pemain pergi setelah scene selesai.
+ * - `hub`: kembali ke hub (atau ke scene penutup kalau slot hari ini habis)
+ * - `endDay`: akhiri hari sekarang, lanjut ke scene penutup hari
+ * - `nextDay`: dipakai scene penutup; mulai hari berikutnya, atau ke ending kalau tidak ada
+ * - `ending`: evaluasi ending sekarang
+ */
 export type SceneExit =
-  { to: 'scene'; sceneId: string } | { to: 'hub' } | { to: 'endDay' } | { to: 'ending' }
+  | { to: 'scene'; sceneId: string }
+  | { to: 'hub' }
+  | { to: 'endDay' }
+  | { to: 'nextDay' }
+  | { to: 'ending' }
 
 export type InnerSightLayer = {
-  beats: readonly Beat[]
+  /** Penglihatan hanya berisi baris, tanpa pilihan. */
+  beats: readonly Line[]
   effects?: readonly Effect[]
 }
 
@@ -160,6 +171,39 @@ export type EndingRule = {
   requires?: Condition
 }
 
+export type EndingDefinition = {
+  id: string
+  title: string
+  text: string
+}
+
+// ── Paket konten ──────────────────────────────────────────────────
+
+export type Character = {
+  id: string
+  name: string
+}
+
+export type Location = {
+  id: string
+  name: string
+}
+
+/** Seluruh konten satu episode. Divalidasi oleh `validateContent`. */
+export type StoryContent = {
+  startSceneId: string
+  characters: Readonly<Record<string, Character>>
+  locations: Readonly<Record<string, Location>>
+  scenes: Readonly<Record<string, Scene>>
+  /** Kunci = nomor hari. */
+  days: Readonly<Record<number, DayDefinition>>
+  journal: Readonly<Record<string, JournalEntry>>
+  deductions: readonly Deduction[]
+  /** Urutan prioritas; elemen terakhir wajib tanpa syarat. */
+  endingRules: readonly EndingRule[]
+  endings: Readonly<Record<string, EndingDefinition>>
+}
+
 // ── State ─────────────────────────────────────────────────────────
 
 export type StoryState = {
@@ -172,6 +216,8 @@ export type StoryState = {
   promisesBroken: readonly string[]
   time: GameTime
   visitsDone: readonly string[]
+  /** Kunjungan hub yang scene-nya sedang berjalan; waktu maju saat kembali ke hub. */
+  activeVisit: string | null
   innerSightUsed: readonly string[]
   deductionsSolved: readonly string[]
   deductionsFailed: readonly string[]
