@@ -27,6 +27,7 @@ export type GameUiState = {
 
 export type GameAction =
   | { type: 'start' }
+  | { type: 'load'; session: Session }
   | { type: 'advance' }
   | { type: 'choose'; optionId: string }
   | { type: 'pick'; index: number }
@@ -43,6 +44,7 @@ const initial: GameUiState = { session: null, sight: null, journalOpen: false, l
 
 function reducer(content: StoryContent, ui: GameUiState, action: GameAction): GameUiState {
   if (action.type === 'start') return { ...initial, session: startGame(content) }
+  if (action.type === 'load') return { ...initial, session: action.session }
   if (action.type === 'backToTitle') return initial
   if (action.type === 'toggleJournal') {
     return { ...ui, journalOpen: !ui.journalOpen, lastDeduction: null }

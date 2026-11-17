@@ -1,9 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { currentScene, innerSightStatus, type StoryContent } from '@/engine'
 import { ChoiceList } from './ChoiceList'
 import { DialogueBox } from './DialogueBox'
 import { HubView } from './HubView'
 import { JournalPanel } from './JournalPanel'
+import { downloadSave, writeAutosave } from './saveStorage'
+import { TitleScreen } from './TitleScreen'
 import { useGame } from './useGame'
 
 const SLOT_LABEL = { pagi: 'Pagi', siang: 'Siang', sore: 'Sore', malam: 'Malam', larut: 'Larut' }
@@ -17,6 +19,7 @@ const SIGHT_LABEL = {
 export function GameScreen({ content }: { content: StoryContent }) {
   const [ui, dispatch] = useGame(content)
   const { session, sight, journalOpen } = ui
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -43,26 +46,18 @@ export function GameScreen({ content }: { content: StoryContent }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [dispatch, journalOpen, sight])
 
+  // Autosave setiap kali sesi berubah. Save hanya beberapa KB, jadi aman ditulis sering.
+  useEffect(() => {
+    if (session) writeAutosave(session)
+  }, [session])
+
   if (!session) {
     return (
-      <main className="flex h-full flex-col items-center justify-center gap-6 px-4 text-center">
-        <div className="flex flex-col gap-3">
-          <h1 className="font-serif text-4xl tracking-[0.3em] sm:text-6xl">THE HOLLOW</h1>
-          <p className="text-moss text-sm tracking-widest uppercase">Desa yang Terlupakan</p>
-        </div>
-        <button
-          type="button"
-          autoFocus
-          onClick={() => dispatch({ type: 'start' })}
-          className="border-bone/40 hover:border-bone rounded-sm border px-8 py-3 font-serif text-lg"
-        >
-          Mulai
-        </button>
-        <p className="text-bone/40 max-w-sm text-xs">
-          Build demo. Mengandung tema orang hilang dan tekanan psikologis. Disarankan memakai
-          headphone.
-        </p>
-      </main>
+      <TitleScreen
+        content={content}
+        onStart={() => dispatch({ type: 'start' })}
+        onLoad={(loaded) => dispatch({ type: 'load', session: loaded })}
+      />
     )
   }
 
@@ -99,6 +94,50 @@ export function GameScreen({ content }: { content: StoryContent }) {
           >
             Jurnal ({state.journal.length})
           </button>
+          <div className="relative">
+            <button
+              type="button"
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+              onClick={() => setMenuOpen((open) => !open)}
+              className="border-bone/30 hover:border-bone rounded-sm border px-3 py-1"
+            >
+              Menu
+            </button>
+            {menuOpen && (
+              <div
+                role="menu"
+                className="border-bone/20 bg-night absolute right-0 z-10 mt-2 flex w-56 flex-col rounded-sm border p-1 text-left"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    downloadSave(session)
+                    setMenuOpen(false)
+                  }}
+                  className="hover:bg-bone/10 rounded-sm px-3 py-2 text-left"
+                >
+                  Simpan ke file
+                  <span className="text-bone/50 block text-xs">
+                    Cadangan kalau browser menghapus data
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    dispatch({ type: 'backToTitle' })
+                  }}
+                  className="hover:bg-bone/10 rounded-sm px-3 py-2 text-left"
+                >
+                  Kembali ke judul
+                  <span className="text-bone/50 block text-xs">Progres tersimpan otomatis</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

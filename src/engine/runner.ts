@@ -56,6 +56,35 @@ export function startGame(content: StoryContent): Session {
   return enterScene(content, state, content.startSceneId)
 }
 
+/** Bentuk fase yang disimpan di file save. Detail fase dihitung ulang saat dimuat. */
+export type SavedPhase = 'scene' | 'hub' | 'ending'
+
+export function savedPhaseOf(session: Session): SavedPhase {
+  const { kind } = session.phase
+  return kind === 'line' || kind === 'choice' ? 'scene' : kind
+}
+
+/**
+ * Bangun ulang sesi dari state yang dimuat.
+ * Kalau scene di save sudah tidak ada atau berubah (misalnya setelah update konten),
+ * pemain dikembalikan ke hub hari itu sebagai checkpoint.
+ */
+export function resumeSession(
+  content: StoryContent,
+  state: StoryState,
+  phase: SavedPhase,
+): Session {
+  if (phase === 'ending') return toEnding(content, state)
+
+  const hub: Session = { state: { ...state, activeVisit: null }, phase: { kind: 'hub' } }
+  if (phase === 'hub') return hub
+
+  const scene = content.scenes[state.position.sceneId]
+  const beat = scene?.beats[state.position.beatIndex]
+  if (!scene || !beat || beat.kind === 'effects') return hub
+  return settle(content, state)
+}
+
 function enterScene(content: StoryContent, state: StoryState, sceneId: string): Session {
   getScene(content, sceneId)
   return settle(content, { ...state, position: { sceneId, beatIndex: 0 } })
