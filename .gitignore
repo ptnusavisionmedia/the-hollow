@@ -1,0 +1,37 @@
+# Dependencies & build
+node_modules
+dist
+dist-ssr
+coverage
+*.tsbuildinfo
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Repo ini PUBLIC: story bible, naskah spoiler, dan aset mentah disimpan di sini, tidak di-commit
+private/
+assets-raw/
+*.psd
+*.kra
+*.clip
+*.aup3
+*.flp
+*.wav
+*.aiff
+
+# Editor & OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.suo
+*.sw?

@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-night: #0b0d0c;
+  --color-bone: #e8e4da;
+  --color-moss: #5b6b52;
+  --font-serif: 'Georgia', 'Times New Roman', serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-night);
+  color: var(--color-bone);
+}
